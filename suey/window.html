@@ -21,20 +21,29 @@
             Css,
             Div,
             Docker,
+            FlexBox,
+            FlexSpacer,
             Floater,
+            MainWindow,
             Iris,
+            ShadowBox,
             Tabbed,
             Titled,
+            ToolbarButton,
         } from 'suey';
 
         import {
             DOCK_SIDES,
+            IMAGE_ADD,
             RESIZERS,
-            TAB_SIDES,
+            TAB_SIDES
         } from 'suey';
 
-        const docker = new Docker();
-        document.body.appendChild(docker.dom);
+        /***** Main Window *****/
+
+        const mainWindow = new MainWindow()
+        document.body.appendChild(mainWindow.dom);
+        const docker = mainWindow.docker;
 
         /***** Helper Functions *****/
 
@@ -65,9 +74,8 @@
         function randInt(max) {
             return Math.floor(Math.random() * max);
         }
-        function randomChars(min = 8, max = 2000) {
-            // const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            const CHARACTERS = '.';
+        function randomChars(min = 8, max = 2000, letters = false) {
+            const CHARACTERS = letters ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' : '.';
             const CHANCE_ENTER = 10;
             const length = randInt(max - min + 1) + min;
             let word = '';
@@ -83,7 +91,6 @@
         const dockLeft = docker.addDock(DOCK_SIDES.LEFT, '20%');
         const dockRight = docker.addDock(DOCK_SIDES.RIGHT, '20%');
         const dockBottom = docker.addDock(DOCK_SIDES.BOTTOM, '35%');
-        const dockTop = docker.addDock(DOCK_SIDES.TOP, '20%');
 
         const tabby1 = dockLeft.enableTabs();
         const howdy = new Floater('howdy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
@@ -100,11 +107,6 @@
         const dippy = new Floater('dippy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
         tabby3.addTab(hippy, dippy);
 
-        const tabby4 = dockTop.enableTabs();
-        const hoopy = new Floater('hoopy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        const doopy = new Floater('doopy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        tabby4.addTab(hoopy, doopy);
-
         const miniDock = dockLeft.addDock(DOCK_SIDES.BOTTOM, '30%');
         const tabby5 = miniDock.enableTabs();
         const huppy = new Floater('huppy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
@@ -115,6 +117,55 @@
         setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
         }, 0);
+
+        /***** Windows *****/
+
+        function addWindow(qty = 1) {
+            const rect = mainWindow.dom.getBoundingClientRect();
+            for (let i = 0; i < qty; i++) {
+                const newWindow = mainWindow.addWindow({
+                    title: 'Window',
+                    height: '300px',
+                    width: '300px',
+                    left: `${randInt(rect.width - 300)}px`,
+                    top: `${randInt(rect.height - 400) + 100}px`,
+                    startCentered: false,
+                });
+                const windowName = randomChars(5, 9, true);
+                const floater = new Floater(windowName, new Div(randomChars()).setStyle('overflow', 'auto'), { color: new Iris().setRandom().hexString() });
+                newWindow.addTab(floater);
+                newWindow.selectTab(windowName);
+                newWindow.setTitle(windowName);
+            }
+        }
+        addWindow(3);
+
+        /***** Toolbar *****/
+
+        const button1 = new ToolbarButton().add(new ShadowBox(IMAGE_ADD).evenShadow());
+        const button2 = new ToolbarButton(null, 'left');
+        const button3 = new ToolbarButton(null, 'middle');
+        const button4 = new ToolbarButton(null, 'right');
+        const button5 = new ToolbarButton();
+        const button6 = new ToolbarButton();
+        const button7 = new ToolbarButton();
+
+        button1.setAttribute('tooltip', 'Add Window');
+
+        button1.onPress(() => {
+            addWindow();
+        });
+
+        const toolbar = new FlexBox().setStyle('flex', '0 0 auto', 'pointerEvents', 'none');
+        toolbar.add(button1, new FlexSpacer(), button2, button3, button4)
+        toolbar.add(new FlexSpacer(), button5, button6, button7);
+        mainWindow.addToSelf(toolbar);
+
+        toolbar.setStyle('padding', 'var(--pad-small)', 'padding-bottom', '0');
+        mainWindow.docker.setStyle(
+            'height', 'calc(100% - (var(--button-size) + (var(--pad-small) * 2)))',
+            'top', 'calc(var(--button-size) + (var(--pad-small) * 2))',
+        );
 
     </script>
 
