@@ -17,6 +17,7 @@
     <script type="module">
 
         import {
+            ColorizeFilter,
             ColorScheme,
             Css,
             Div,
@@ -24,17 +25,21 @@
             FlexBox,
             FlexSpacer,
             Floater,
-            MainWindow,
             Iris,
+            MainWindow,
+            Question,
             ShadowBox,
             Tabbed,
             Titled,
             ToolbarButton,
+            VectorBox,
         } from 'suey';
 
         import {
+            BUTTON_TYPES,
             DOCK_SIDES,
             IMAGE_ADD,
+            QUESTION_ICONS,
             RESIZERS,
             TAB_SIDES
         } from 'suey';
@@ -75,7 +80,7 @@
             return Math.floor(Math.random() * max);
         }
         function randomChars(min = 8, max = 2000, letters = false) {
-            const CHARACTERS = letters ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' : '.';
+            const CHARACTERS = letters ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' : '.';
             const CHANCE_ENTER = 10;
             const length = randInt(max - min + 1) + min;
             let word = '';
@@ -95,23 +100,23 @@
         const tabby1 = dockLeft.enableTabs();
         const howdy = new Floater('howdy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
         const doody = new Floater('doody', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        tabby1.addTab(howdy, doody);
+        tabby1.addFloater(howdy, doody);
 
         const tabby2 = dockRight.enableTabs();
         const handy = new Floater('handy', { icon: `../files/logo/suey.svg`, color: '#773399', shrink: 0.5 }).add(new Div(randomChars()));
         const dandy = new Floater('dandy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        tabby2.addTab(handy, dandy);
+        tabby2.addFloater(handy, dandy);
 
         const tabby3 = dockBottom.enableTabs();
         const hippy = new Floater('hippy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
         const dippy = new Floater('dippy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        tabby3.addTab(hippy, dippy);
+        tabby3.addFloater(hippy, dippy);
 
         const miniDock = dockLeft.addDock(DOCK_SIDES.BOTTOM, '30%');
         const tabby5 = miniDock.enableTabs();
         const huppy = new Floater('huppy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
         const duppy = new Floater('duppy', { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()));
-        tabby5.addTab(huppy, duppy);
+        tabby5.addFloater(huppy, duppy);
 
         // Force initial resizing
         setTimeout(() => {
@@ -132,33 +137,77 @@
                     startCentered: false,
                 });
                 const windowName = randomChars(5, 9, true);
-                const floater = new Floater(windowName, new Div(randomChars()).setStyle('overflow', 'auto'), { color: new Iris().setRandom().hexString() });
-                newWindow.addTab(floater);
-                newWindow.selectTab(windowName);
-                newWindow.setTitle(windowName);
+                const floater = new Floater(windowName, { color: new Iris().setRandom().hexString() }).add(new Div(randomChars()).setStyle('overflow', 'auto'));
+                newWindow.addFloater(floater);
+                newWindow.focus();
             }
         }
         addWindow(3);
 
         /***** Toolbar *****/
 
-        const button1 = new ToolbarButton().add(new ShadowBox(IMAGE_ADD).evenShadow());
-        const button2 = new ToolbarButton(null, 'left');
-        const button3 = new ToolbarButton(null, 'middle');
-        const button4 = new ToolbarButton(null, 'right');
-        const button5 = new ToolbarButton();
-        const button6 = new ToolbarButton();
-        const button7 = new ToolbarButton();
+        const button1 = new ToolbarButton().add(new VectorBox(IMAGE_ADD));
+        button1.contents().evenShadow();
+        button1.contents().setColor('complement');
+
+        const button2 = new ToolbarButton().setColor('blue');
+        const button3 = new ToolbarButton().setColor('green');
+        const button4 = new ToolbarButton().setColor('yellow');
+        const button5 = new ToolbarButton().setColor('red');
+
+        const button6 = new ToolbarButton(null, 'left');
+        const button7 = new ToolbarButton(null, 'middle');
+        const button8 = new ToolbarButton(null, 'right');
 
         button1.setAttribute('tooltip', 'Add Window');
-
         button1.onPress(() => {
             addWindow();
         });
 
+        function alerted(button) {
+            console.log(`Pressed: ${button} ('${Question.buttonByValue(button)}')`);
+        }
+
+        let color = null;
+
+        button2.onPress(() => {
+            let text = 'This is a info box.';
+            // let color = 'blue';
+            // let color = 'cadetblue';
+            let color = '#005678';
+            const question = new Question({ icon: QUESTION_ICONS.INFO, color, text, buttons: [ BUTTON_TYPES.OKAY ] }).alert(alerted);
+        });
+
+        button3.onPress(() => {
+            let text = 'This is a question box?';
+            let color = 'green';
+            const question = new Question({ icon: QUESTION_ICONS.QUESTION, color, text, buttons: [ BUTTON_TYPES.NO, BUTTON_TYPES.YES ], defaultButton: BUTTON_TYPES.NO }).alert(alerted);
+        });
+
+        button4.onPress(() => {
+            let text = 'This is a warning box!';
+            // let color = 'yellow';
+            const question = new Question({ icon: QUESTION_ICONS.WARNING, color, text, buttons: [ BUTTON_TYPES.CANCEL, BUTTON_TYPES.NO, BUTTON_TYPES.YES], defaultButton: BUTTON_TYPES.CANCEL }).alert(alerted);
+        });
+
+        button5.onPress(() => {
+            let text = 'This is an error box!';
+            // let color = 'red';
+            const question = new Question({ icon: QUESTION_ICONS.ERROR, color, text, buttons: [ BUTTON_TYPES.OKAY ] }).alert(alerted);
+        });
+
+        button6.onPress(() => {
+            button6.toggleClass('suey-selected');
+        })
+        button7.onPress(() => {
+            button7.toggleClass('suey-selected');
+        })
+        button8.onPress(() => {
+            button8.toggleClass('suey-selected');
+        })
+
         const toolbar = new FlexBox().setStyle('flex', '0 0 auto', 'pointerEvents', 'none');
-        toolbar.add(button1, new FlexSpacer(), button2, button3, button4)
-        toolbar.add(new FlexSpacer(), button5, button6, button7);
+        toolbar.add(button1, new FlexSpacer(), button2, button3, button4, button5, new FlexSpacer(), button6, button7, button8);
         mainWindow.addToSelf(toolbar);
 
         toolbar.setStyle('padding', 'var(--pad-small)', 'padding-bottom', '0');
