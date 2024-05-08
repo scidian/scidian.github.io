@@ -7,7 +7,7 @@ document.write(`
     <script type='importmap'>
     {
         "imports": {
-            "suey": "https://unpkg.com/@salinity/suey@0.1.28/dist/suey.module.js"
+            "suey": "https://unpkg.com/@salinity/suey@0.1.29/dist/suey.module.js"
         }
     }
     </script>
